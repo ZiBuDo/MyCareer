@@ -268,58 +268,72 @@ function readFileInput($filename){
 		$stmt = $conn->prepare("SELECT * FROM `occupation_data` WHERE `title` = :id");
 		$stmt->bindParam(':id', $a["Title"], PDO::PARAM_STR);
 		$stmt->execute();
-		$r = $stmt->fetchAll()[0];
-		$oneTotal[$r["onetsoc_code"]] = $a["Total"];
-		$total += $a["Total"];
+		$r = $stmt->fetchAll();
+		foreach($r as $z){
+			$oneTotal[$z["onetsoc_code"]] = $a["Total"];
+			$total += $a["Total"];
+			break;
+		}
 	}
+	
 	$multProb = array();
 	foreach($oneId as $one){
 		$subtotal = $oneTotal[$one]; //get title's total
-		//major
-		$majorProb = 0;
-		$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `SOC Code` = '$one' AND `Major` = :major AND `Sample Name` = 'All'"); 
-		$stmt->bindParam(':major', $major, PDO::PARAM_STR);
-		$stmt->execute();
-		$result = $stmt->fetchAll();
-		foreach($result as $a){
-			$majorProb = $a["VALUE"]/$subtotal;
+		echo $subtotal;
+		if($subtotal == null || $subtotal == 0){
+			//major
+			$majorProb = 0;
+			$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `SOC Code` = '$one' AND `Major` = :major AND `Sample Name` = 'All'"); 
+			$stmt->bindParam(':major', $major, PDO::PARAM_STR);
+			$stmt->execute();
+			$result = $stmt->fetchAll();
+			foreach($result as $a){
+				$majorProb = $a["VALUE"]/$subtotal;
+			}
+			//generation
+			$generation = 0;
+			$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `SOC Code` = '$one' AND `Major` = :major AND `Sample Name` = '$gen'"); 
+			$stmt->bindParam(':major', $major, PDO::PARAM_STR);
+			$stmt->execute();
+			$result = $stmt->fetchAll();
+			foreach($result as $a){
+				$generation = $a["VALUE"]/$subtotal;
+			}
+			//degree
+			$degree = 0;
+			$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `SOC Code` = '$one' AND `Major` = :major AND `Sample Name` = '$degree'"); 
+			$stmt->bindParam(':major', $major, PDO::PARAM_STR);
+			$stmt->execute();
+			$result = $stmt->fetchAll();
+			foreach($result as $a){
+				$degree = $a["VALUE"]/$subtotal;
+			}
+			//gender
+			$gender = 0;
+			$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `SOC Code` = '$one' AND `Major` = :major AND `Sample Name` = '$gender'");
+			$stmt->bindParam(':major', $major, PDO::PARAM_STR);		
+			$stmt->execute();
+			$result = $stmt->fetchAll();
+			foreach($result as $a){
+				$gender = $a["VALUE"]/$subtotal;
+			}
+			$profession = ($subtotal/$total);
+			$multProb[$one] = $gender * $degree * $generation * $majorProb * $profession;
+		}else{
+			$multProb[$one] = 0;
 		}
-		//generation
-		$generation = 0;
-		$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `SOC Code` = '$one' AND `Major` = :major AND `Sample Name` = '$gen'"); 
-		$stmt->bindParam(':major', $major, PDO::PARAM_STR);
-		$stmt->execute();
-		$result = $stmt->fetchAll();
-		foreach($result as $a){
-			$generation = $a["VALUE"]/$subtotal;
-		}
-		//degree
-		$degree = 0;
-		$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `SOC Code` = '$one' AND `Major` = :major AND `Sample Name` = '$degree'"); 
-		$stmt->bindParam(':major', $major, PDO::PARAM_STR);
-		$stmt->execute();
-		$result = $stmt->fetchAll();
-		foreach($result as $a){
-			$degree = $a["VALUE"]/$subtotal;
-		}
-		//gender
-		$gender = 0;
-		$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `SOC Code` = '$one' AND `Major` = :major AND `Sample Name` = '$gender'");
-		$stmt->bindParam(':major', $major, PDO::PARAM_STR);		
-		$stmt->execute();
-		$result = $stmt->fetchAll();
-		foreach($result as $a){
-			$gender = $a["VALUE"]/$subtotal;
-		}
-		$profession = ($subtotal/$total);
-		$multProb[$one] = $gender * $degree * $generation * $majorProb * $profession;
 	}
 	
 	
 	//Final calculation Prob / Aggregate
+	//default aggDiff is 1.5
 	$final = array();
 	foreach($oneId as $one){
-		$final["$one"] = $multProb[$one]/$aggDiff[$one]; //id => value
+		$a = $aggDiff[$one];
+		if($a == null || $a == ""){
+			$a = 1.5;
+		}
+		$final["$one"] = $multProb[$one]/$a; //id => value
 	}
 	
 	
@@ -327,7 +341,7 @@ function readFileInput($filename){
 	arsort($final);
 	$keys = array();
 	$x = 0;
-	foreach ($fruits as $key => $val) {
+	foreach ($final as $key => $val) {
 		$keys[] = $key;
 		$x++;
 		if($x > 4){
@@ -350,9 +364,9 @@ function readFileInput($filename){
 	$numbers = array("one=","two=","three=","four=","five=");
 	for($x = 0; $x < 5; $x++) {
 		if($x < 4){
-			$location .= $numbers . $names[$x] . "&";
+			$location .= $numbers[$x] . $names[$x] . "&";
 		}else{
-			$location .= $numbers . $names[$x];
+			$location .= $numbers[$x] . $names[$x];
 		}
 	}
 	
