@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<!--
+	Transit by TEMPLATED
+	templated.co @templatedco
+	Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
+-->
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>My Career</title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link rel="icon" href="http://projects.miscthings.xyz/assets/img/favicon.ico">
+			<link rel="stylesheet" href="css/skel.css" />
+			<link rel="stylesheet" href="css/style.css" />
+			<link rel="stylesheet" href="css/style-xlarge.css" />
+		<!--[if lte IE 8]><script src="js/html5shiv.js"></script><![endif]-->
+	</head>
+	<body>
+		<!-- Header -->
+			<header id="header">
+				<h1><a href="index.html">My Career</a></h1>
+				<nav id="nav">
+					<ul>
+						<li><a href="index.html">Home</a></li>
+						<li><a href="careers.html">Careers</a></li>
+						<li><a href="classify.html" class="button special">Classify Me!</a></li>
+					</ul>
+				</nav>
+			</header>
+
+		<!-- Main -->
+			<section id="main" class="wrapper">
+				<div class="container">
+
+					<header class="major">
+						<h2>Explore Careers</h2>
+						<p>Select a Career from Below to Learn About it!</p>
+					</header>
+					<div class="loader"></div>
+					<div id="choiceList" class="col-lg-8 col-lg-offset-3" style="display:none">
+							<form id="careerChoice" action="#" method="POST">
+							  <input list="careers" name="career" id="career" style="min-width:500px;"/>
+							  <datalist id="careers">
+							  </datalist>
+							  <input class="button special" type="submit">
+							</form>
+					</div>
+					<div class="loader2"></div>
+					<div id="info" style="display:none">
+					<ul  class="nav nav-pills">
+						<li class="active"><a href="#Overview" data-toggle="tab">Overview</a></li>
+						<li><a href="#Knowledge" data-toggle="tab">Knowledge</a></li>
+						<li><a href="#Skills" data-toggle="tab">Skills</a></li>
+						<li><a href="#Abilities" data-toggle="tab">Abilities</a></li>
+						<li><a href="#Green" data-toggle="tab">Green</a></li>
+						<li><a href="#Technologies" data-toggle="tab">Hot Technologies</a></li>
+						<li><a href="#Similar" data-toggle="tab">Similar</a></li>
+						<li><a href="#Help" data-toggle="tab">Help</a></li>
+					</ul>
+					<br>
+					<br>
+					<div class="tab-content clearfix">
+						<div class="tab-pane active" id="Overview">
+							
+						</div>
+						<div class="tab-pane" id="Knowledge">
+							
+						</div>
+						<div class="tab-pane" id="Skills">
+							
+						</div>
+					<div class="tab-pane" id="Abilities">
+							
+						</div>
+					  <div class="tab-pane" id="Green">
+							
+						</div>
+						<div class="tab-pane" id="Technologies">
+							
+						</div>
+						<div class="tab-pane" id="Similar">
+							
+						</div>
+						<div class="tab-pane" id="Help">
+							<h3>O*NET Scales for Different Tables</h3>
+							<table id="tfhover" class="tftable" border="1">
+								<tr><th>Scale ID</th><th>Scale Name</th><th>Minimum</th><th>Maximum</th></tr>
+								<tr><td>CT</td><td>	Context</td><td>1</td><td>7</td></tr>
+								<tr><td>CTP</td><td>Context (Categories 1-3)</td><td>0</td><td>100</td></tr>
+								<tr><td>CX</td><td>Context</td><td>1</td><td>5</td></tr>
+								<tr><td>CXP</td><td>Context (Categories 1-5)</td><td>0</td><td>100</td></tr>
+								<tr><td>IM</td><td>Importance</td><td>1</td><td>5</td></tr>
+								<tr><td>LV</td><td>Level</td><td>0</td><td>7</td></tr>
+								<tr><td>OJ</td><td>On-The-Job Training (Categories 1-9)</td><td>0</td><td>100</td></tr>
+								<tr><td>PT</td><td>On-Site Or In-Plant Training (Categories 1-9)</td><td>0</td><td>100</td></tr>
+								<tr><td>RL</td><td>Required Level Of Education (Categories 1-12)</td><td>0</td><td>100</td></tr>
+								<tr><td>RW</td><td>Related Work Experience (Categories 1-11)</td><td>0</td><td>100</td></tr>
+							</table>
+						</div>
+					</div>
+				</div>
+				</div>
+			</section>
+		<script src="js/jquery.min.js"></script>
+		<script src="js/skel.min.js"></script>
+		<script src="js/skel-layers.min.js"></script>
+		<script src="js/init.js"></script>
+		<script src="js/careers.js"></script>
+		    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+
+    <!-- Plugin JavaScript -->
+    <script src="js/jquery.easing.min.js"></script>
+	<script type="text/javascript">
+	window.onload=function(){
+	var tfrow = document.getElementById('tfhover').rows.length;
+	var tbRow=[];
+	for (var i=1;i<tfrow;i++) {
+		tbRow[i]=document.getElementById('tfhover').rows[i];
+		tbRow[i].onmouseover = function(){
+		  this.style.backgroundColor = '#f3f8aa';
+		};
+		tbRow[i].onmouseout = function() {
+		  this.style.backgroundColor = '#ffffff';
+		};
+	}
+};
+</script>
+
+<style type="text/css">
+table.tftable {font-size:12px;color:#333333;width:100%;border-width: 1px;border-color: #729ea5;border-collapse: collapse;}
+table.tftable th {font-size:12px;background-color:#acc8cc;border-width: 1px;padding: 8px;border-style: solid;border-color: #729ea5;text-align:left;}
+table.tftable tr {background-color:#ffffff;}
+table.tftable td {font-size:12px;border-width: 1px;padding: 8px;border-style: solid;border-color: #729ea5;}
+</style>
+		<!-- Footer -->
+			<footer id="footer" class="footer">
+				<div class="container">
+					
+					<div class="row">
+						<div class="8u 12u$(medium)">
+							<ul class="copyright">
+								<li>&copy; Project Misc Things My Career</li>
+							</ul>
+						</div>
+						<div class="4u 12u$(medium)" style="text-align:right">
+							<ul class="copyright">
+								<li>Email: <a href="mailto:paul@miscthings.xyz">paul@miscthings.xyz</a></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</footer>
+
+	</body>
+</html>
