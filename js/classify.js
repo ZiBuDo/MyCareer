@@ -88,14 +88,13 @@ function getClassification(){
 	var datastring =  $("#classifyForm").serialize();
 	$("#loading").show();
 	$("#notload").hide();
-	console.log(datastring);
-	/*$.ajax({
+	$.ajax({
 	  url: "process.php",
 	  type: "GET",
 	  data: datastring,
 	  success: function(data){
 			window.location.href = data;
 	  }
-	});*/
+	});
 	
 }

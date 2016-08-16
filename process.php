@@ -1,9 +1,10 @@
 <?php
 ini_set('memory_limit','1024M');
+/*
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-
+*/
 function readFileInput($filename){
 	$myfile = fopen($filename, "r");
 	$read = fread($myfile,filesize($filename));
@@ -279,8 +280,7 @@ function readFileInput($filename){
 	$multProb = array();
 	foreach($oneId as $one){
 		$subtotal = $oneTotal[$one]; //get title's total
-		echo $subtotal;
-		if($subtotal == null || $subtotal == 0){
+		if(isset($oneTotal[$one])){
 			//major
 			$majorProb = 0;
 			$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `SOC Code` = '$one' AND `Major` = :major AND `Sample Name` = 'All'"); 
