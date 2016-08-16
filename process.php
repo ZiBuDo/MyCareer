@@ -276,49 +276,49 @@ function readFileInput($filename){
 			break;
 		}
 	}
-	
+
 	$multProb = array();
 	foreach($oneId as $one){
 		$subtotal = $oneTotal[$one]; //get title's total
 		if(isset($oneTotal[$one])){
 			//major
-			$majorProb = 0;
+			$majorProb = (1/821) * 1000;
 			$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `SOC Code` = '$one' AND `Major` = :major AND `Sample Name` = 'All'"); 
 			$stmt->bindParam(':major', $major, PDO::PARAM_STR);
 			$stmt->execute();
 			$result = $stmt->fetchAll();
 			foreach($result as $a){
-				$majorProb = $a["VALUE"]/$subtotal;
+				$majorProb = ($a["VALUE"]/$subtotal) * 1000;
 			}
 			//generation
-			$generation = 0;
+			$generation = (1/4) * 1000;
 			$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `SOC Code` = '$one' AND `Major` = :major AND `Sample Name` = '$gen'"); 
 			$stmt->bindParam(':major', $major, PDO::PARAM_STR);
 			$stmt->execute();
 			$result = $stmt->fetchAll();
 			foreach($result as $a){
-				$generation = $a["VALUE"]/$subtotal;
+				$generation = ($a["VALUE"]/$subtotal) * 1000;
 			}
 			//degree
-			$degree = 0;
+			$degree = (1/1536) * 1000;
 			$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `SOC Code` = '$one' AND `Major` = :major AND `Sample Name` = '$degree'"); 
 			$stmt->bindParam(':major', $major, PDO::PARAM_STR);
 			$stmt->execute();
 			$result = $stmt->fetchAll();
 			foreach($result as $a){
-				$degree = $a["VALUE"]/$subtotal;
+				$degree = ($a["VALUE"]/$subtotal) * 1000;
 			}
 			//gender
-			$gender = 0;
+			$gender = (1/2) * 1000;
 			$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `SOC Code` = '$one' AND `Major` = :major AND `Sample Name` = '$gender'");
 			$stmt->bindParam(':major', $major, PDO::PARAM_STR);		
 			$stmt->execute();
 			$result = $stmt->fetchAll();
 			foreach($result as $a){
-				$gender = $a["VALUE"]/$subtotal;
+				$gender = ($a["VALUE"]/$subtotal) * 1000;
 			}
 			$profession = ($subtotal/$total);
-			$multProb[$one] = $gender * $degree * $generation * $majorProb * $profession;
+			$multProb[$one] = ($gender * $degree * $generation * $majorProb * $profession);
 		}else{
 			$multProb[$one] = 0;
 		}
@@ -373,5 +373,6 @@ function readFileInput($filename){
 	//header("Location: $location ");
 	
 	echo $location;
+	
 	
 ?>
