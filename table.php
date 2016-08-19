@@ -22,6 +22,7 @@ try {
 	$conn = new PDO("mysql:host=localhost;dbname=MindSumo;charset=utf8mb4", $username, $password);
 	$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 }catch(PDOException $e){}
+/*
 //create table to hold all majors and CIPs
 //drop Majors if exists
 $stmt = $conn->prepare("DROP TABLE IF EXISTS `Majors`");
@@ -37,8 +38,9 @@ $stmt = $conn->prepare("DROP TABLE IF EXISTS `MajorValues`");
 $stmt->execute();
 $stmt = $conn->prepare("CREATE TABLE `MajorValues` (`SOC Code` VARCHAR(250), `Detailed SOC Occupation` VARCHAR(250), `Sample Name` VARCHAR(250), `VALUE` DOUBLE, `Major` VARCHAR(250))");
 $stmt->execute();
+*/
 $supermax = 350;
-for ($x = 0; $x < count($cols); $x++) {
+for ($x = 25; $x < count($cols); $x++) { //resume
 	$col = $cols[$x];
 	//skip first three cols
 	if($x > 2){

@@ -25,7 +25,7 @@ try {
 }catch(PDOException $e){}
 
 $supermax = 1750;
-for ($x = 1401; $x < count($cols); $x++) {
+for ($x = 1424; $x < count($cols); $x++) {  //resume
 	$col = $cols[$x];
 	//skip first three cols
 	if($x > 2){

@@ -66,18 +66,21 @@ function readFileInput($filename){
 	$degree = $_GET["degree"];
 	$gender = $_GET["gender"] . "s";
 	$oneId = array();
+	$global_contentmodel = array();
+	$stmt = $conn->prepare("SELECT * FROM `content_model_reference`");
+	$stmt->execute();
+	$result = $stmt->fetchAll();
+	foreach($result as $r){
+		$global_contentmodel[$r[0]] = $r[1];   //array with id => value
+	}
 	//calculate interests
 	$interests = array();
 	$stmt = $conn->prepare("SELECT DISTINCT `element_id` FROM `interests` WHERE `scale_id` = 'OI' ORDER BY `element_id` ASC");
 	$stmt->execute();
 	$result = $stmt->fetchAll();
 	foreach($result as $a){
-		$stmt = $conn->prepare("SELECT * FROM `content_model_reference` WHERE `element_id` = :id");
-		$stmt->bindParam(':id', $a["element_id"], PDO::PARAM_STR);
-		$stmt->execute();
-		$r = $stmt->fetchAll()[0];
-		$val = $r[1];
-		$interests[] = array($r[0],$val); //element_id, name
+		$val = $global_contentmodel[$a["element_id"]];
+		$interests[] = array($a["element_id"],$val); //element_id, name
 	}
 	$intVals = array();
 	foreach($interests as $interest){
@@ -115,12 +118,8 @@ function readFileInput($filename){
 	$stmt->execute();
 	$result = $stmt->fetchAll();
 	foreach($result as $a){
-		$stmt = $conn->prepare("SELECT * FROM `content_model_reference` WHERE `element_id` = :id");
-		$stmt->bindParam(':id', $a["element_id"], PDO::PARAM_STR);
-		$stmt->execute();
-		$r = $stmt->fetchAll()[0];
-		$val = str_replace(" ","_",$r[1]);
-		$interests[] = array($r[0],$val); //element_id, name
+		$val = str_replace(" ","_",$global_contentmodel[$a["element_id"]]);
+		$interests[] = array($a["element_id"],$val); //element_id, name
 	}
 	$intVals = array();
 	foreach($interests as $interest){
@@ -164,12 +163,8 @@ function readFileInput($filename){
 	$stmt->execute();
 	$result = $stmt->fetchAll();
 	foreach($result as $a){
-		$stmt = $conn->prepare("SELECT * FROM `content_model_reference` WHERE `element_id` = :id");
-		$stmt->bindParam(':id', $a["element_id"], PDO::PARAM_STR);
-		$stmt->execute();
-		$r = $stmt->fetchAll()[0];
-		$val = str_replace(" ","_",$r[1]);
-		$interests[] = array($r[0],$val); //element_id, name
+		$val = str_replace(" ","_",$global_contentmodel[$a["element_id"]]);
+		$interests[] = array($a["element_id"],$val); //element_id, name
 	}
 	$intVals = array();
 	foreach($interests as $interest){
@@ -213,12 +208,8 @@ function readFileInput($filename){
 	$stmt->execute();
 	$result = $stmt->fetchAll();
 	foreach($result as $a){
-		$stmt = $conn->prepare("SELECT * FROM `content_model_reference` WHERE `element_id` = :id");
-		$stmt->bindParam(':id', $a["element_id"], PDO::PARAM_STR);
-		$stmt->execute();
-		$r = $stmt->fetchAll()[0];
-		$val = str_replace(" ","_",$r[1]);
-		$interests[] = array($r[0],$val); //element_id, name
+		$val = str_replace(" ","_",$global_contentmodel[$a["element_id"]]);
+		$interests[] = array($a["element_id"],$val); //element_id, name
 	}
 	$intVals = array();
 	foreach($interests as $interest){
@@ -255,68 +246,79 @@ function readFileInput($filename){
 		$aggDiff["$one"] = ($a + $aggDiff["$one"])/2; //get average
 	}
 	unset($diffAbility);
-	
-	
+
 	//Bayes
 	//Calculate Major P(Profession | Evidence) = P(Evidence | Profession) x P(Profession) mostly handled in table.php set up
 	//Utilize P(c|x) = P(Xo|c) x P(X1|c) ... x P(c)
+	$stmt = $conn->prepare("SELECT * FROM `occupation_data`");
+	$stmt->execute();
+	$r = $stmt->fetchAll();
+	$global_occupation = array();
+	foreach($r as $z){
+		$global_occupation[$z["title"]] = $z["onetsoc_code"];
+		$global_occupation_id[$z["onetsoc_code"]] = $z["title"];
+	}
 	$oneTotal = array();
 	$total = 0; //total of all titles
 	$stmt = $conn->prepare("SELECT * FROM `TotalTitles`"); //already ine one order
 	$stmt->execute();
 	$result = $stmt->fetchAll();
 	foreach($result as $a){
-		$stmt = $conn->prepare("SELECT * FROM `occupation_data` WHERE `title` = :id");
-		$stmt->bindParam(':id', $a["Title"], PDO::PARAM_STR);
-		$stmt->execute();
-		$r = $stmt->fetchAll();
-		foreach($r as $z){
-			$oneTotal[$z["onetsoc_code"]] = $a["Total"];
+		if(isset($global_occupation[$a["Title"]])){
+			$oneTotal[$global_occupation[$a["Title"]]] = $a["Total"];
 			$total += $a["Total"];
-			break;
 		}
 	}
-
+	
+	$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `Major` = :major AND `Sample Name` = 'All'"); 
+	$stmt->bindParam(':major', $major, PDO::PARAM_STR);
+	$stmt->execute();
+	$result = $stmt->fetchAll();
+	$majorGlob = array();
+	foreach($result as $r){
+		$majorGlob[$r["SOC Code"]] = $r["VALUE"];
+	}
+	$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `Major` = :major AND `Sample Name` = '$gen'"); 
+	$stmt->bindParam(':major', $major, PDO::PARAM_STR);
+	$stmt->execute();
+	$result = $stmt->fetchAll();
+	$genGlob = array();
+	foreach($result as $r){
+		$genGlob[$r["SOC Code"]] = $r["VALUE"];
+	}
+	$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `Major` = :major AND `Sample Name` = '$degree'"); 
+	$stmt->bindParam(':major', $major, PDO::PARAM_STR);
+	$stmt->execute();
+	$result = $stmt->fetchAll();
+	$degreeGlob = array();
+	foreach($result as $r){
+		$degreeGlob[$r["SOC Code"]] = $r["VALUE"];
+	}
+	$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `Major` = :major AND `Sample Name` = '$gender'"); 
+	$stmt->bindParam(':major', $major, PDO::PARAM_STR);
+	$stmt->execute();
+	$result = $stmt->fetchAll();
+	$genderGlob = array();
+	foreach($result as $r){
+		$genderGlob[$r["SOC Code"]] = $r["VALUE"];
+	}
+	
 	$multProb = array();
 	foreach($oneId as $one){
-		$subtotal = $oneTotal[$one]; //get title's total
-		if(isset($oneTotal[$one])){
+		if(isset($oneTotal[$one]) && isset($majorGlob[$one]) && isset($genderGlob[$one]) && isset($degreeGlob[$one]) && isset($genGlob[$one])){
+			$subtotal = $oneTotal[$one]; //get title's total
 			//major
 			$majorProb = (1/821) * 1000;
-			$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `SOC Code` = '$one' AND `Major` = :major AND `Sample Name` = 'All'"); 
-			$stmt->bindParam(':major', $major, PDO::PARAM_STR);
-			$stmt->execute();
-			$result = $stmt->fetchAll();
-			foreach($result as $a){
-				$majorProb = ($a["VALUE"]/$subtotal) * 1000;
-			}
+			$majorProb = ($majorGlob[$one]/$subtotal) * 1000;
 			//generation
 			$generation = (1/4) * 1000;
-			$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `SOC Code` = '$one' AND `Major` = :major AND `Sample Name` = '$gen'"); 
-			$stmt->bindParam(':major', $major, PDO::PARAM_STR);
-			$stmt->execute();
-			$result = $stmt->fetchAll();
-			foreach($result as $a){
-				$generation = ($a["VALUE"]/$subtotal) * 1000;
-			}
+			$genGlob = ($genGlob[$one]/$subtotal) * 1000;
 			//degree
 			$degree = (1/1536) * 1000;
-			$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `SOC Code` = '$one' AND `Major` = :major AND `Sample Name` = '$degree'"); 
-			$stmt->bindParam(':major', $major, PDO::PARAM_STR);
-			$stmt->execute();
-			$result = $stmt->fetchAll();
-			foreach($result as $a){
-				$degree = ($a["VALUE"]/$subtotal) * 1000;
-			}
+			$degree = ($degreeGlob[$one]/$subtotal) * 1000;
 			//gender
 			$gender = (1/2) * 1000;
-			$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `SOC Code` = '$one' AND `Major` = :major AND `Sample Name` = '$gender'");
-			$stmt->bindParam(':major', $major, PDO::PARAM_STR);		
-			$stmt->execute();
-			$result = $stmt->fetchAll();
-			foreach($result as $a){
-				$gender = ($a["VALUE"]/$subtotal) * 1000;
-			}
+			$gender = ($genderGlob[$one]/$subtotal) * 1000;
 			$profession = ($subtotal/$total);
 			$multProb[$one] = ($gender * $degree * $generation * $majorProb * $profession);
 		}else{
@@ -352,13 +354,7 @@ function readFileInput($filename){
 	//find key names and pass that array
 	$names = array();
 	foreach($keys as $key){
-		$stmt = $conn->prepare("SELECT * FROM `occupation_data` WHERE `onetsoc_code` = :id"); 
-		$stmt->bindParam(':id', $key, PDO::PARAM_STR);
-		$stmt->execute();
-		$result = $stmt->fetchAll();
-		foreach($result as $a){
-			$names[] = $a["title"];
-		}
+		$names[] = $global_occupation_id[$key];
 	}
 	$location = "http://projects.miscthings.xyz/CollegeCareer/result.html?";
 	$numbers = array("one=","two=","three=","four=","five=");
@@ -373,6 +369,4 @@ function readFileInput($filename){
 	//header("Location: $location ");
 	
 	echo $location;
-	
-	
 ?>
