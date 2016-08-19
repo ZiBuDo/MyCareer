@@ -8,6 +8,7 @@ function readFileInput($filename){
 	fclose($myfile);
 	return $read;
 }
+sleep(25);
 $config = json_decode(readFileInput('sql.cfg'),true);
 $username = $config[0];
 $password = $config[1];
@@ -23,24 +24,8 @@ try {
 	$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 }catch(PDOException $e){}
 
-//create table to hold all majors and CIPs
-//drop Majors if exists
-$stmt = $conn->prepare("DROP TABLE IF EXISTS `Majors`");
-$stmt->execute();
-$stmt = $conn->prepare("CREATE TABLE IF NOT EXISTS `Majors` (`Major` VARCHAR(250))");
-$stmt->execute();
-
-//reset TitleTotal totals before adding 
-$stmt = $conn->prepare("DROP TABLE IF EXISTS `TotalTitles`");
-$stmt->execute();
-//create table
-$stmt = $conn->prepare("DROP TABLE IF EXISTS `MajorValues`");
-$stmt->execute();
-$stmt = $conn->prepare("CREATE TABLE `MajorValues` (`SOC Code` VARCHAR(250), `Detailed SOC Occupation` VARCHAR(250), `Sample Name` VARCHAR(250), `VALUE` DOUBLE, `Major` VARCHAR(250))");
-$stmt->execute();
-
-$supermax = 160;
-for ($x = 0; $x < count($cols); $x++) { //resume
+$supermax = 1600;
+for ($x = 1441; $x < count($cols); $x++) {  //resume
 	$col = $cols[$x];
 	//skip first three cols
 	if($x > 2){
@@ -161,7 +146,6 @@ for ($x = 0; $x < count($cols); $x++) { //resume
 		break; //finished this process each does 160 majors or to the end of 1536
 	}
 }
-
 
 
 

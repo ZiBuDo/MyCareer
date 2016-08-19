@@ -312,13 +312,13 @@ function readFileInput($filename){
 			$majorProb = ($majorGlob[$one]/$subtotal) * 1000;
 			//generation
 			$generation = (1/4) * 1000;
-			$genGlob = ($genGlob[$one]/$subtotal) * 1000;
+			$genGlob = ($genGlob[$one]/$majorGlob[$one]) * 1000;
 			//degree
 			$degree = (1/1536) * 1000;
-			$degree = ($degreeGlob[$one]/$subtotal) * 1000;
+			$degree = ($degreeGlob[$one]/$majorGlob[$one]) * 1000;
 			//gender
 			$gender = (1/2) * 1000;
-			$gender = ($genderGlob[$one]/$subtotal) * 1000;
+			$gender = ($genderGlob[$one]/$majorGlob[$one]) * 1000;
 			$profession = ($subtotal/$total);
 			$multProb[$one] = ($gender * $degree * $generation * $majorProb * $profession);
 		}else{
