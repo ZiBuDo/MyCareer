@@ -99,7 +99,7 @@ for ($x = 1281; $x < count($cols); $x++) {  //resume
 			foreach($globLine as $l){
 				//get esitmator based on Laplace add one smoothing and update row
 				$v = (double)$l[2];
-				$v = ($v + 1)/($globTotal + 1); //calculator esitmator assuming 1 trial 
+				$v = ($v + 1); //calculator esitmator assuming 1 trial 
 				$occupation = $l[0];
 				$name = $l[1];
 				$code = $l[3];

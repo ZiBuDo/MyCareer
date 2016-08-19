@@ -41,7 +41,7 @@ function readFileInput($filename){
 	// [Prob(Profession | Major) x Prob(Gender) x Prob(Degree) x Prob(Age)]/[Average Aggregate AverageDifference in Each Category]  ==> High prob divide by small number creates big classification curve linearly regressed, if denominator is 0, it is changed to .01 x categories
 	
 	$defGen = "Gen Y (1982-2000)";
-	$defMajor = "Algebra and Number Theory\CIP CODE 27.0102"; //random default major
+	$defMajor = "Accounting and Finance\CIP CODE 52.0304"; //random default major
 	
 	$gen = "";
 	if($_GET["date"] == null || $_GET["date"] == ""){
@@ -63,6 +63,7 @@ function readFileInput($filename){
 	}else{
 		$major = $_GET["major"];
 	}
+	//$major = $defMajor;
 	$degree = $_GET["degree"];
 	$gender = $_GET["gender"] . "s";
 	$oneId = array();
@@ -149,12 +150,14 @@ function readFileInput($filename){
 	} 
 	//for careers without information we give them a 1.5 diff on average
 	foreach($oneId as $one){
-		$a = $diffKnow[$one];
-		if($a == null || $a == ""){
-			$a = 1.5;
+		if(isset($diffKnow[$one])){
+			$a = $diffKnow[$one];
+			if($a == null || $a == ""){
+				$a = 1.5;
+			}
+			
+			$aggDiff["$one"] = ($a + $aggDiff["$one"])/2; //get average
 		}
-		
-		$aggDiff["$one"] = ($a + $aggDiff["$one"])/2; //get average
 	}
 	unset($diffKnow);
 	//calculate skills
@@ -194,12 +197,14 @@ function readFileInput($filename){
 		}
 	} 
 	foreach($oneId as $one){
-		$a = $diffSkill[$one];
-		if($a == null || $a == ""){
-			$a = 1.5;
+		if(isset($diffKnow[$one])){
+			$a = $diffSkill[$one];
+			if($a == null || $a == ""){
+				$a = 1.5;
+			}
+			
+			$aggDiff["$one"] = ($a + $aggDiff["$one"])/2; //get average
 		}
-		
-		$aggDiff["$one"] = ($a + $aggDiff["$one"])/2; //get average
 	}
 	unset($diffSkill);
 	//calculate abilities
@@ -238,15 +243,18 @@ function readFileInput($filename){
 		}
 	} 
 	foreach($oneId as $one){
-		$a = $diffAbility[$one];
-		if($a == null || $a == ""){
-			$a = 1.5;
+		if(isset($diffAbility[$one])){
+			$a = $diffAbility[$one];
+			if($a == null || $a == ""){
+				$a = 1.5;
+			}
+			
+			$aggDiff["$one"] = ($a + $aggDiff["$one"])/2; //get average
 		}
-		
-		$aggDiff["$one"] = ($a + $aggDiff["$one"])/2; //get average
 	}
 	unset($diffAbility);
-
+	//arsort($aggDiff);
+	//var_dump($aggDiff);
 	//Bayes
 	//Calculate Major P(Profession | Evidence) = P(Evidence | Profession) x P(Profession) mostly handled in table.php set up
 	//Utilize P(c|x) = P(Xo|c) x P(X1|c) ... x P(c)
@@ -269,7 +277,6 @@ function readFileInput($filename){
 			$total += $a["Total"];
 		}
 	}
-	
 	$stmt = $conn->prepare("SELECT * FROM `MajorValues` WHERE `Major` = :major AND `Sample Name` = 'All'"); 
 	$stmt->bindParam(':major', $major, PDO::PARAM_STR);
 	$stmt->execute();
@@ -302,31 +309,37 @@ function readFileInput($filename){
 	foreach($result as $r){
 		$genderGlob[$r["SOC Code"]] = $r["VALUE"];
 	}
-	
 	$multProb = array();
 	foreach($oneId as $one){
-		if(isset($oneTotal[$one]) && isset($majorGlob[$one]) && isset($genderGlob[$one]) && isset($degreeGlob[$one]) && isset($genGlob[$one])){
+		if(isset($oneTotal[$one]) && isset($majorGlob[$one]) && isset($genGlob[$one]) && isset($degreeGlob[$one]) && isset($genderGlob[$one])){
 			$subtotal = $oneTotal[$one]; //get title's total
 			//major
-			$majorProb = (1/821) * 1000;
-			$majorProb = ($majorGlob[$one]/$subtotal) * 1000;
+			$majorProb = ($majorGlob[$one]/$subtotal);
 			//generation
-			$generation = (1/4) * 1000;
-			$genGlob = ($genGlob[$one]/$majorGlob[$one]) * 1000;
+			$generation = ($genGlob[$one]/$majorGlob[$one]);
 			//degree
-			$degree = (1/1536) * 1000;
-			$degree = ($degreeGlob[$one]/$majorGlob[$one]) * 1000;
+			$degree = ($degreeGlob[$one]/$majorGlob[$one]);
 			//gender
-			$gender = (1/2) * 1000;
-			$gender = ($genderGlob[$one]/$majorGlob[$one]) * 1000;
+			$gender = ($genderGlob[$one]/$majorGlob[$one]);
 			$profession = ($subtotal/$total);
-			$multProb[$one] = ($gender * $degree * $generation * $majorProb * $profession);
+			if($gender == 1){
+				$gender = .5;
+			}
+			if($degree == 1){
+				$degree = .25;
+			}
+			if($generation == 1){
+				$generation = .25;
+			}
+			$multProb[$one] = ($gender * $degree * $generation * $majorProb * $profession) * 100;
 		}else{
 			$multProb[$one] = 0;
 		}
 	}
-	
-	
+	//arsort($multProb);
+	//var_dump($multProb);
+	//arsort($aggDiff);
+	//var_dump($aggDiff);
 	//Final calculation Prob / Aggregate
 	//default aggDiff is 1.5
 	$final = array();
@@ -341,6 +354,7 @@ function readFileInput($filename){
 	
 	//sort associative descending
 	arsort($final);
+	//var_dump($final);
 	$keys = array();
 	$x = 0;
 	foreach ($final as $key => $val) {
@@ -350,7 +364,7 @@ function readFileInput($filename){
 			break;
 		}
 	}
-	
+	//var_dump($keys);
 	//find key names and pass that array
 	$names = array();
 	foreach($keys as $key){
